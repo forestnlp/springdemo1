@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+">
+    <!--添加注解扫描,扫描指定的包,将包中的所有有注解的类实例化
+    base-package 后面放要扫描的包
+    如果有多个包需要扫描,可以使用逗号隔开  com.msb.bean,com.msb.service
+    或者可以写上一层包路径  com.msb
+    可以通过注解指定bean的id@Component("user1")
+    如果不指定,则id默认是 类名首字母小写
+    -->
+    <!--spring 包扫描  -->
+    <context:component-scan base-package="com.demo"/>
+    <!--aop autoProxy 自动生成代理对象 -->
+    <aop:aspectj-autoproxy/>
+
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="url" value="${jdbc.url}"></property>
+        <property name="driverClassName" value="${jdbc.driver}"></property>
+    </bean>
+
+    <!--配置JDBCTemplate对象,并向里面注入DataSource-->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <!--通过set方法注入连接池-->
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!--配置一个事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!--将数据源注入事务管理器-->
+        <property name="dataSource"  ref="dataSource"></property>
+    </bean>
+    <!--开启事务注解-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+<!--    <aop:config>-->
+<!--        &lt;!&ndash;配置切入点&ndash;&gt;-->
+<!--        <aop:pointcut id="pt" expression="execution(* com.demo.service.AccountService.transMoney(..))"/>-->
+<!--        &lt;!&ndash;配置切面&ndash;&gt;-->
+<!--        <aop:advisor advice-ref="txAdvice" pointcut-ref="pt"></aop:advisor>-->
+<!--    </aop:config>-->
+
+<!--    <tx:advice id="txAdvice">-->
+<!--        &lt;!&ndash;配置事务参数&ndash;&gt;-->
+<!--        <tx:attributes>-->
+<!--            <tx:method name="transMoney" isolation="DEFAULT" propagation="REQUIRED"/>-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
+
+
+</beans>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="empDao" class="com.demo.dao.impl.EmpDaoImpl"></bean>
+    <bean id="user0" class="com.demo.entity.User" name="user0" scope="prototype" lazy-init="true"></bean>
+    <bean id="user1" class="com.demo.entity.User">
+        <property name="userid" value="1"></property>
+        <property name="username" value="张三"></property>
+        <property name="password" value="abcdefg"></property>
+    </bean>
+    <bean id="user2" class="com.demo.entity.User">
+        <constructor-arg name="userid" value="2"></constructor-arg>
+        <constructor-arg name="username" value="小明"></constructor-arg>
+        <constructor-arg name="password" value="123456789"></constructor-arg>
+    </bean>
+    <bean id="user3" class="com.demo.entity.User">
+        <constructor-arg index="0"  value="3"></constructor-arg>
+        <constructor-arg index="1"  value="小黑"></constructor-arg>
+        <constructor-arg index="2"  value="987654321"></constructor-arg>
+    </bean>
+    <bean id="user4" class="com.demo.entity.User" p:userid="4" p:username="小东" p:password="111111" ></bean>
+    <!--c名称空间,就是对constructor-arg的简化-->
+    <bean id="user5" class="com.demo.entity.User" c:userid="5" c:username="小西" c:password="222222" ></bean>
+    <bean id="user6" class="com.demo.entity.User">
+        <!--null值-->
+        <property name="userid">
+            <null></null>
+        </property>
+        <!--特殊符号 转译字符 < &lt;  >&gt;  & &amp;     -->
+        <property name="username" value="&amp;xiaoming&lt;&gt;"></property>
+        <!-- 特殊符号  <![CDATA[内容]]>  -->
+        <property name="password">
+            <value><![CDATA[&<123456>]]></value>
+        </property>
+    </bean>
+
+    <bean id="date1" class="java.util.Date"></bean>
+    <bean id="mouse1" class="com.demo.entity.Mouse">
+        <property name="name" value="Jerry"></property>
+        <!--bean引用引用外部bean-->
+        <property name="birthdate" ref="date1"></property>
+    </bean>
+    <bean id="cat1" class="com.demo.entity.Cat">
+        <property name="name" value="Tom"></property>
+        <!--引用内部bean-->
+        <property name="mouse1" >
+            <bean class="com.demo.entity.Mouse">
+                <property name="name" value="Jerry2"></property>
+                <property name="birthdate">
+                    <bean class="java.util.Date"></bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="mouse2" class="com.demo.entity.Mouse"></bean>
+
+    <bean id="cat2" class="com.demo.entity.Cat">
+        <property name="name" value="Tom2"></property>
+        <!--级联引入bean-->
+        <property name="mouse1" ref="mouse2"></property>
+        <!--用反射调用get*** 方法,获得对象之后,再赋值-->
+        <property name="mouse1.name" value="Jerry3"></property>
+        <property name="mouse1.birthdate">
+            <bean class="java.util.Date"></bean>
+        </property>
+    </bean>
+
+    <util:list id="outerbookList">
+        <!--声明多个Book对象-->
+        <bean id="b1" class="com.demo.entity.Book" p:bname="JAVA" p:author="马士兵"></bean>
+        <bean id="b2" class="com.demo.entity.Book" p:bname="Go" p:author="马士兵"></bean>
+        <bean id="b3" class="com.demo.entity.Book" p:bname="JVM" p:author="马士兵"></bean>
+    </util:list>
+
+    <bean id="student1" class="com.demo.entity.Student">
+        <!--数组属性注入-->
+        <property name="books">
+            <array>
+                <value>JAVA</value>
+                <value>MySQL</value>
+                <value>Spring</value>
+            </array>
+        </property>
+        <!--set集合注入-->
+        <property name="bookSet">
+            <set>
+                <value>JAVA</value>
+                <value>MySQL</value>
+                <value>Spring</value>
+            </set>
+        </property>
+        <!--list集合注入-->
+        <property name="bookList">
+            <list>
+                <value>JAVA</value>
+                <value>MySQL</value>
+                <value>Spring</value>
+            </list>
+        </property>
+        <!--map集合注入-->
+        <property name="bookMap">
+            <map>
+                <entry key="JAVA" value="马士兵"></entry>
+                <entry key="Go" value="马士兵"></entry>
+                <entry key="JVM" value="马士兵"></entry>
+            </map>
+        </property>
+        <!--List对象集合注入-->
+        <property name="bookList2" ref="outerbookList"></property>
+    </bean>
+
+    <bean id="book" class="com.demo.factory.BookFactory"></bean>
+
+
+    <bean id="userlifecycle" class="com.demo.entity.UserLifeCycle" init-method="initUserLifeCycle" destroy-method="destoryUserLifeCycle">
+        <property name="username" value="xiaoming"></property>
+    </bean>
+
+    <bean id="myBeanProcesser" class="com.demo.processor.MyBeanProcesser"></bean>
+
+    <bean id="dept" class="com.demo.entity.Dept"></bean>
+    <!--
+    autowire 属性控制自动将容器中的对象注入到当前对象的属性上
+    byName 根据目标id值和属性值注入,要保证当前对象的属性值和目标对象的id值一致
+    byType 根据类型注入,要保证相同类型的目标对象在容器中只有一个实例
+    -->
+    <bean id="emp" class="com.demo.entity.Emp" autowire="byName"></bean>
+
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="url" value="${jdbc.url}"></property>
+        <property name="driverClassName" value="${jdbc.driver}"></property>
+    </bean>
+</beans>
